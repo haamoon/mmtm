@@ -25,10 +25,11 @@ SOFTWARE.
 """
 
 import sys
-sys.path.append('mfas')
 
 # Make sure MFAS is in the path
+sys.path.append('mfas')
 import models.central.ntu as central
+from main_found_ntu import get_dataloaders
 
 import torch
 import argparse
@@ -63,9 +64,6 @@ def parse_args():
 
   parser.add_argument('--train', action='store_true', default=False, help='training')
   return parser.parse_args()
-
-
-from main_found_ntu import get_dataloaders
 
 def update_lr(optimizer, multiplier = .1):
   state_dict = optimizer.state_dict()
