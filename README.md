@@ -24,6 +24,7 @@ This code has been tested on Ubuntu 16.04 with Python 3.8.3 and PyTorch 1.4.0.
 * Install sklearn by running `pip install sklearn`.
 
 ## Download the pre-trained checkpoints and prepare NTU RGB+D dataset
+* Clone this repository along with [MFAS](https://github.com/juanmanpr/mfas) submodule by running `git clone --recurse-submodules https://github.com/haamoon/mmtm.git`
 * Download and uncompress the [checkpoints](https://gtvault-my.sharepoint.com/:u:/g/personal/ashaban6_gatech_edu/EZQR-QfpPqZPnK_ClGGkbtYBuDqWgWUdlsdun5p316uHIQ?e=1Nz8FI) and place them in 'ROOT/checkpoint' dicrectory.
 * Download [NTU RGB+D](http://rose1.ntu.edu.sg/datasets/actionrecognition.asp) dataset.
 * Copy all skeleton files to `ROOT/NUT/nturgbd_skeletons/` directory. 
