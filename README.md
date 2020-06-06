@@ -19,7 +19,7 @@ If you use this code, please cite the paper:
 This code has been tested on Ubuntu 16.04 with Python 3.8.3 and PyTorch 1.4.0.
 * Install [Pytorch 1.4.0](https://pytorch.org).
 * Install [tqdm](https://github.com/tqdm/tqdm) by running `pip install tqdm`.
-* Install opencv by running 'pip install opencv-python`.
+* Install opencv by running `pip install opencv-python`.
 * Install matplotlib by running `pip install matplotlib`.
 * Install sklearn by running `pip install sklearn`.
 
