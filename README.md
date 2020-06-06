@@ -34,4 +34,4 @@ This code has been tested on Ubuntu 16.04 with Python 3.8.3 and PyTorch 1.4.0.
 
 ## Training
 * Run `python main_mmtm_ntu.py --datadir ROOT/NTU --checkpointdir ROOT/checkpoints --train --ske_cp skeleton_32frames_85.24.checkpoint --rgb_cp rgb_8frames_83.91.checkpoint`.
-* We have trained the model with `--batchsize 20` and `--use_dataparallel` options on 4 GPUs.
+* We have trained the model with `--batchsize 20 --use_dataparallel` options on 4 GPUs.
