@@ -1,0 +1,3 @@
+[submodule "mfas"]
+	path = mfas
+	url = https://github.com/juanmanpr/mfas.git
