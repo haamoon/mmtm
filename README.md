@@ -1,3 +1,5 @@
+[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/mmtm-multimodal-transfer-module-for-cnn/action-recognition-in-videos-on-ntu-rgbd)](https://paperswithcode.com/sota/action-recognition-in-videos-on-ntu-rgbd?p=mmtm-multimodal-transfer-module-for-cnn)
+
 ## MMTM: Multimodal Transfer Module for CNN Fusion
 
 Code for the paper [MMTM: Multimodal Transfer Module for CNN Fusion](https://arxiv.org/abs/1911.08670). This is a reimplementation of the original MMTM code to reproduce the results on NTU RGB+D dataset in Table 5 of the paper.
