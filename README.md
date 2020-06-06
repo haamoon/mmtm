@@ -26,7 +26,7 @@ This code has been tested on Ubuntu 16.04 with Python 3.8.3 and PyTorch 1.4.0.
 ### Download the pre-trained checkpoints and prepare NTU RGB+D dataset
 * Download and uncompress the [checkpoints](https://gtvault-my.sharepoint.com/:u:/g/personal/ashaban6_gatech_edu/EZQR-QfpPqZPnK_ClGGkbtYBuDqWgWUdlsdun5p316uHIQ?e=1Nz8FI) and place them in 'ROOT/checkpoint' dicrectory.
 * Download [NTU RGB+D](http://rose1.ntu.edu.sg/datasets/actionrecognition.asp) dataset.
-* Copy all skeleton files to `ROOT/nturgbd_skeletons/` directory. 
+* Copy all skeleton files to `ROOT/NUT/nturgbd_skeletons/` directory. 
 * Change all video clips resolution to 256x256 30fps and copy them to `ROOT/NTU/nturgbd_rgb/avi_256x256_30/` directory.
 
 ### Evaluate the pre-trained model
