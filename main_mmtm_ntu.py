@@ -71,7 +71,26 @@ def update_lr(optimizer, multiplier = .1):
     param_group['lr'] = param_group['lr'] * multiplier
   optimizer.load_state_dict(state_dict)
 
-def train_mmtm_track_acc(model, criteria, optimizer1, optimizer2 ,
+def step(branch, input_data, optimizers, criteria, is_training):
+  rgb, ske, label = input_data
+  optimizer = optimizers[branch]
+  # Track history only in training
+  with torch.set_grad_enabled(is_training):
+    output = model((rgb, ske))
+    # Predict
+    _, preds1 = torch.max(output[0], 1)
+    _, preds2 = torch.max(output[1], 1)
+    _, preds = torch.max(output[0] + output[1], 1)
+    # Backward
+    optimizer.zero_grad()
+    loss = criteria(output[branch], label)
+    # Backward into the branch
+    if is_training:
+      loss.backward()
+      optimizer.step()
+  return loss, preds1, preds2, preds
+
+def train_mmtm_track_acc(model, criteria, optimizers,
                          dataloaders, dataset_sizes,
                          device=None, num_epochs=200,
                          verbose=False, multitask=False):
@@ -88,8 +107,8 @@ def train_mmtm_track_acc(model, criteria, optimizer1, optimizer2 ,
 
         # Learning rate schedule
         if is_training and (epoch == 5 or epoch == 20):
-            update_lr(optimizer1, multiplier = .1)
-            update_lr(optimizer2, multiplier = .1)
+            update_lr(optimizers[0], multiplier = .1)
+            update_lr(optimizers[1], multiplier = .1)
 
         running_loss1, running_loss2 = 0.0, 0.0
         running_corrects, running_corrects1, running_corrects2 = 0, 0, 0
@@ -97,44 +116,23 @@ def train_mmtm_track_acc(model, criteria, optimizer1, optimizer2 ,
 
         # Iterate over data
         for data in tqdm(dataloaders[phase]):
-          # Get the inputs
-          rgb, ske, label = [data[n].to(device) for n in ['rgb', 'ske', 'label']]
+          input_data = [data[n].to(device) for n in ['rgb', 'ske', 'label']]
+          if input_data[0].shape[2] == 0:
+            continue
 
-          # Track history only in training
-          with torch.set_grad_enabled(is_training):
-            if rgb.shape[2] == 0:
-              continue
-
-            # Forward
-            output = model((rgb, ske))
-
-            # Predict
-            _, preds1 = torch.max(output[0], 1)
-            _, preds2 = torch.max(output[1], 1)
-            _, preds = torch.max(output[0] + output[1], 1)
-
-            # Backward
-            optimizer1.zero_grad()
-            loss1 = criteria[0](output[0], label)
-            # Backward into the visual branch 
-            if is_training:
-              loss1.backward(retain_graph=True)
-              optimizer1.step()
-
-            optimizer2.zero_grad()
-            loss2 = criteria[0](output[1], label)
-            # backward into the skeleton branch
-            if is_training:
-              loss2.backward()
-              optimizer2.step()
+          # Update Visual Branch
+          loss1, preds1, _, preds = step(0, input_data, optimizers, criteria, is_training)
+          # Update Skeleton Branch
+          loss2, _, preds2, _ = step(1, input_data, optimizers, criteria, is_training)
 
           # Update statistics
-          running_loss1 += loss1.item() * rgb.size(0)
-          running_corrects1 += torch.sum(preds1 == label.data)
-          running_loss2 += loss2.item() * rgb.size(0)
-          running_corrects2 += torch.sum(preds2 == label.data)
-          running_corrects += torch.sum(preds == label.data)
-          ndata = ndata + rgb.size(0)
+          batch_size = input_data[0].size(0)
+          running_loss1 += loss1.item() * batch_size
+          running_corrects1 += torch.sum(preds1 == input_data[2].data)
+          running_loss2 += loss2.item() * batch_size
+          running_corrects2 += torch.sum(preds2 == input_data[2].data)
+          running_corrects += torch.sum(preds == input_data[2].data)
+          ndata = ndata + batch_size
 
         avg_loss = (running_loss1 + running_loss2) / ndata / 2
         epoch_loss = [avg_loss,
@@ -215,7 +213,7 @@ def test_model(model, dataloaders, args, device):
 def train_model(model, dataloaders, args, device):
   dataset_sizes = {x: len(dataloaders[x].dataset) for x in ['train', 'test', 'dev']}
 
-  criteria = [torch.nn.CrossEntropyLoss() for _ in range(3)]
+  criteria = torch.nn.CrossEntropyLoss()
 
   # loading pretrained weights
   skemodel_filename = os.path.join(args.checkpointdir, args.ske_cp)
@@ -224,27 +222,25 @@ def train_model(model, dataloaders, args, device):
   model.visual.load_state_dict(torch.load(rgbmodel_filename))
 
   # optimizers
-  optimizer1 = torch.optim.Adam(model.get_visual_params(), lr=.0001, weight_decay=1e-4)
-  optimizer2 = torch.optim.Adam(model.get_skeleton_params(), lr=.0001, weight_decay=1e-4)
+  optimizers = [torch.optim.Adam(model.get_visual_params(), lr=.0001, weight_decay=1e-4),
+                torch.optim.Adam(model.get_skeleton_params(), lr=.0001, weight_decay=1e-4)]
 
   # hardware tuning
   if torch.cuda.device_count() > 1 and args.use_dataparallel:
     model = torch.nn.DataParallel(model)
   model.to(device)
 
-  val_model_acc = train_mmtm_track_acc(model, criteria, optimizer1, optimizer2,
-                                       dataloaders, dataset_sizes, device=device,
+  val_model_acc = train_mmtm_track_acc(model, criteria, optimizers, dataloaders,
+                                       dataset_sizes, device=device,
                                        num_epochs=args.epochs, verbose=args.verbose,
                                        multitask=args.multitask)
   return val_model_acc
 
-#%%
 if __name__ == "__main__":
   print("Training MMTM network")
   args = parse_args()
   print("The configuration of this run is:")
 
-  #%% hardware
   use_gpu = torch.cuda.is_available()
   device = torch.device("cuda:0" if use_gpu else "cpu")
 
@@ -258,8 +254,7 @@ if __name__ == "__main__":
   model.set_visual_skeleton_nets(visual, skeleton)
 
   if args.train:
-    val_acc = train_model(model, dataloaders, args, device)
-    print('Model Validation Acc: {:.4f}'.format(val_acc))
+    train_model(model, dataloaders, args, device)
   else:
     test_acc = test_model(model, dataloaders, args, device)
     print('Acc Multimodal: {:.4f}, Acc Visual: {:.4f}, Acc Skeleton: {:.4f}'.format(*test_acc))
