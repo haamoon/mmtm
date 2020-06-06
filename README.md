@@ -30,7 +30,7 @@ This code has been tested on Ubuntu 16.04 with Python 3.8.3 and PyTorch 1.4.0.
 ## Evaluation
 * Run `python main_mmtm_ntu.py --datadir ROOT/NTU --checkpointdir ROOT/checkpoints --test_cp fusion_mmtm_epoch_8_val_loss_0.1873.checkpoint --no_bad_skel`.
 * Reduce the batch size if run out of memeory e.g. `--batchsize 1`.
-* Add '--use_dataparallel' to use multiple GPUs.
+* Add `--use_dataparallel` to use multiple GPUs.
 
 ## Training
 * Run `python main_mmtm_ntu.py --datadir ROOT/NTU --checkpointdir ROOT/checkpoints --train --ske_cp skeleton_32frames_85.24.checkpoint --rgb_cp rgb_8frames_83.91.checkpoint`.
