@@ -21,20 +21,17 @@ This code has been tested on Ubuntu 16.04 with Python 3.8.3 and PyTorch 1.4.0.
 * Install matplotlib by running `pip install matplotlib`.
 * Install sklearn by running `pip install sklearn`.
 
-## Evaluation
-
-### Download the pre-trained checkpoints and prepare NTU RGB+D dataset
+## Download the pre-trained checkpoints and prepare NTU RGB+D dataset
 * Download and uncompress the [checkpoints](https://gtvault-my.sharepoint.com/:u:/g/personal/ashaban6_gatech_edu/EZQR-QfpPqZPnK_ClGGkbtYBuDqWgWUdlsdun5p316uHIQ?e=1Nz8FI) and place them in 'ROOT/checkpoint' dicrectory.
 * Download [NTU RGB+D](http://rose1.ntu.edu.sg/datasets/actionrecognition.asp) dataset.
 * Copy all skeleton files to `ROOT/NUT/nturgbd_skeletons/` directory. 
 * Change all video clips resolution to 256x256 30fps and copy them to `ROOT/NTU/nturgbd_rgb/avi_256x256_30/` directory.
 
-### Evaluate the pre-trained model
+## Evaluation
 * Run `python main_mmtm_ntu.py --datadir ROOT/NTU --checkpointdir ROOT/checkpoints --test_cp fusion_mmtm_epoch_8_val_loss_0.1873.checkpoint --no_bad_skel`.
 * You can reduce the batch size if run out of memeory e.g. `--batchsize 1`.
 * Add '--use_dataparallel' to use multiple GPUs.
 
 ## Training
-* Follow the steps in [Evaluation](#Evaluation) to download the pre-trained checkpoints and NTU RGB+D dataset.
 * Run `python main_mmtm_ntu.py --datadir ROOT/NTU --checkpointdir ROOT/checkpoints --train --ske_cp skeleton_32frames_85.24.checkpoint --rgb_cp rgb_8frames_83.91.checkpoint`.
 * We have trained the model with `--batchsize 20` and `--use_dataparallel` options on 4 GPUs.
