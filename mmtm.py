@@ -27,8 +27,6 @@ SOFTWARE.
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import models.auxiliary.inflated_resnet as resnet
-import models.utils as utils
 from models.auxiliary.resnet.resnet import transform_input
 
 
