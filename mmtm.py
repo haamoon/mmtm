@@ -258,7 +258,7 @@ class MMTNet(nn.Module):
     new_sk_hidden.append(out8)
 
     t = outf
-    assert not ((t != t).any())# find out nan in tensor
+    assert not(torch.isnan(t).any()) # find out nan in tensor
     skeleton_features = [new_sk_hidden, outf]
 
     #visual
