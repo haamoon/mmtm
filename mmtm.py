@@ -41,7 +41,7 @@ class MMTM(nn.Module):
   def __init__(self, dim_visual, dim_skeleton, ratio):
     super(MMTM, self).__init__()
     dim = dim_visual + dim_skeleton
-    dim_out = int(2*dim/ratio)
+    dim_out = int(dim/ratio)
     self.fc_squeeze = nn.Linear(dim, dim_out)
 
     self.fc_visual = nn.Linear(dim_out, dim_visual)
@@ -207,11 +207,10 @@ class MMTNet(nn.Module):
     # 2nd residual block
     frames = transform_input(frames, rgb_resnet.layer2[0].input_dim, T=T)
     frames = rgb_resnet.layer2(frames)
-    fm2 = frames
 
     #################################### FIRST MMTM
-    #fm2, out5_max ==> fm2, out5_p0 (out5_p1)
-    fm2, out5_p0 = self.mmtm0(fm2, out5_p0)
+    frames, out5_p0 = self.mmtm0(frames, out5_p0)
+    fm2 = frames
     ####################################
 
     # skeleton
@@ -226,11 +225,10 @@ class MMTNet(nn.Module):
     # 3rd residual block
     frames = transform_input(frames, rgb_resnet.layer3[0].input_dim, T=T)
     frames = rgb_resnet.layer3(frames)
-    fm3 = frames
 
     ###################################### SECOND MMTM
-    #fm3, out7 ==> fm3, out7
-    fm3, out7 = self.mmtm1(fm3, out7)
+    frames, out7 = self.mmtm1(frames, out7)
+    fm3 = frames
     ######################################
 
     # skeleton
@@ -265,9 +263,9 @@ class MMTNet(nn.Module):
     # Temporal pooling
     vis_out5 = self.visual.temporal_pooling(final_fm)
     vis_out6 = self.visual.classifier(vis_out5)
-    visual_features = [fm1, fm2, fm3, final_fm, vis_out5, vis_out6]
 
     if self.return_interm_feas:
+      visual_features = [fm1, fm2, fm3, final_fm, vis_out5, vis_out6]
       return visual_features, skeleton_features
 
     ### LATE FUSION
